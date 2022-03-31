@@ -3,7 +3,7 @@ Script to query basic information about a database.
 
 Change log:
 Author            Date
-M. Kretschmer  25.02.2022      First implementation
+M. Kretschmer  26.02.2022      First implementation
 M. Kretschmer  28.02.2022      First steps of visulation, and improvements of the info option
 
 """
@@ -39,20 +39,24 @@ else:
 if args.info:
     info_query=[]
     for row in cur.execute('SELECT sql FROM sqlite_schema ORDER BY tbl_name, type DESC, name'):
-        #print(type(row[0]))
-        info_query.append(row[0].split("\n"))
+
+        #print("Create command:", row[0], "\n\n")
+        info_query.append(row[0].replace("\n","").replace(")","").replace("(","").split())
     for info_str in info_query:
-        tablenames = info_str[0].split(" ")[2]
+        tablenames = info_str[2]#[0].split(" ")[2]
         print("Table name: " + tablenames)
         rows_num = cur.execute("SELECT COUNT(*) FROM " + tablenames).fetchall()[0][0]
         print("number of rows: " + str(rows_num) + "\n\nContains Columns:")
-        info_str[1] = info_str[1].replace("               (","")
-        col = info_str[1].split(", ")
+        #print(len(info_str))
+        #info_str[1] = info_str[1].replace("               (","")
+        col = info_str[3:]#.split(", ")
+        #print(col)
         print("Column name      ! datatyp\n--------------------------")
         head_str=" "
-        for i in col:
-            print('{0: <16} !'.format(i.split(" ")[0]) + " " + i.split(" ")[1].replace(")",""))
-            head_str += '{0: <18} ! '. format(i.split(" ")[0])
+        for i in range(0,len(col)):
+            print('{0: <16} !'.format(col[i]) + " " + col[1])
+            head_str += '{0: <18} ! '. format(col[i])
+            i+=1
         
         #print out example data with default select statement
         print("\nExample data of table " + tablenames)
